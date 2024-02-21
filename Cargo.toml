@@ -2,6 +2,8 @@
 name = "indent-s-expr"
 version = "1.0.0"
 edition = "2021"
+description = "Dumb-as-rocks S-expression indenter"
+license = "MIT"
 
 [lib]
 crate-type = ["cdylib"]

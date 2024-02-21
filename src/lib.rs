@@ -249,5 +249,13 @@ mod tests {
     #[rstest]
     fn test_parse_sexp_symbols_atom() {
         assert_debug_snapshot!(parse_sexp("(fn symbol :atom)"));
+        assert_debug_snapshot!(
+            indent_sexp("(+ (alpha / beta) (gamma * delta))", 2),
+            @r###"
+        Ok(
+            "(\n  +\n  (\n    alpha\n    /\n    beta\n  )\n  (\n    gamma\n    *\n    delta\n  )\n)\n",
+        )
+        "###
+        );
     }
 }
