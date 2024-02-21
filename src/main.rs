@@ -52,6 +52,7 @@ struct Line<'a> {
 pub struct NotSexprError;
 
 fn parse_sexp(sexp: &str) -> Result<Vec<Token>, NotSexprError> {
+    println!("parsing sexp: {:?}", sexp);
     let mut tokens = vec![];
     let mut token = None;
     let mut inside_string = false;
@@ -66,11 +67,13 @@ fn parse_sexp(sexp: &str) -> Result<Vec<Token>, NotSexprError> {
                     content: &sexp[i..i + 1],
                     range: (i, i + 1),
                 };
-                println!("pushing token: {:?}", next_token);
+                println!("( pushing token: {:?}", next_token);
                 tokens.push(next_token);
             }
             ')' => {
-                if let Some(token) = token.take() {
+                if let Some(mut token) = token.take() {
+                    token.content = &sexp[token.range.0..i];
+                    println!(") pushing token: {:?}", token);
                     tokens.push(token);
                 }
                 let next_token = Token {
@@ -78,42 +81,44 @@ fn parse_sexp(sexp: &str) -> Result<Vec<Token>, NotSexprError> {
                     content: sexp[i..i + 1].as_ref(),
                     range: (i, i + 1),
                 };
-                println!("pushing token: {:?}", next_token);
+                println!(") pushing token: {:?}", next_token);
                 tokens.push(next_token);
             }
             ' ' | '\n' | '\t' => {
                 if inside_string {
                     let token: &mut Token =
                         token.as_mut().expect("token should exist inside string");
-                    token.content = &sexp[token.content.len()..i];
-                } else if let Some(token) = token.take() {
-                    println!("pushing token: {:?}", token);
+                    token.content = &sexp[token.range.0..i];
+                } else if let Some(mut token) = token.take() {
+                    token.content = &sexp[token.range.0..i];
+                    println!("\\s pushing token: {:?}", token);
                     tokens.push(token);
                 }
             }
             '"' => {
                 if inside_string {
                     let token: Token = token.take().expect("token should exist inside string");
-                    println!("pushing token: {:?}", token);
+                    println!("\" pushing token: {:?}", token);
                     tokens.push(Token {
                         kind: TokenKind::String,
-                        content: token.content,
-                        range: (token.range.0, i + 1),
+                        content: &sexp[token.range.0..i],
+                        range: (token.range.0, i),
                     });
                     inside_string = false;
                 } else {
                     token = Some(Token {
                         kind: TokenKind::String,
-                        content: &sexp[i..i + 1],
-                        range: (i, i + 1),
+                        content: &sexp[i + 1..i + 1],
+                        range: (i + 1, i + 1),
                     });
                     inside_string = true;
+                    println!("start string: {:?}", token);
                 }
             }
             _ => {
                 if let Some(token) = token.as_mut() {
-                    token.content = &sexp[token.content.len()..i];
-                    println!("updated token.content: '{:?}'", token.content);
+                    token.content = &sexp[token.range.0..i];
+                    println!("_ updated token.content: '{:?}'", token.content);
                 } else {
                     token = Some(Token {
                         kind: TokenKind::Symbol,
@@ -138,20 +143,10 @@ fn indent_sexp(sexp: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use insta::assert_debug_snapshot;
     use rstest::rstest;
     use rstest_reuse::{self, *};
     use speculoos::prelude::*;
-
-    #[template]
-    #[rstest]
-    #[case("()")]
-    #[case("(single)")]
-    #[case("(one two)")]
-    #[case("(+ 1 2)")]
-    #[case("(+ 1 (+ 2 3))")]
-    #[case("(+ 1 (+ 2 3) (+ 4 5))")]
-    #[case("(fn symbol 4 \"string\")")]
-    fn basic_expressions(#[case] sexp: &str) {}
 
     #[rstest]
     #[case("()", 2)]
@@ -167,8 +162,477 @@ mod tests {
             .has_length(expected_token_count);
     }
 
-    #[apply(basic_expressions)]
-    fn test_parse_sexp_tree(#[case] sexp: &str) {
-        insta::assert_debug_snapshot!(parse_sexp(sexp));
+    #[rstest]
+    fn test_parse_sexp_empty() {
+        assert_debug_snapshot!(
+            parse_sexp("()"),
+            @r###"
+        Ok(
+            [
+                Token {
+                    kind: OpenParen,
+                    range: (
+                        0,
+                        1,
+                    ),
+                    content: "(",
+                },
+                Token {
+                    kind: CloseParen,
+                    range: (
+                        1,
+                        2,
+                    ),
+                    content: ")",
+                },
+            ],
+        )
+        "###);
+    }
+
+    #[rstest]
+    fn test_parse_sexp_single() {
+        assert_debug_snapshot!(parse_sexp("(single)"), @r###"
+        Ok(
+            [
+                Token {
+                    kind: OpenParen,
+                    range: (
+                        0,
+                        1,
+                    ),
+                    content: "(",
+                },
+                Token {
+                    kind: Symbol,
+                    range: (
+                        1,
+                        2,
+                    ),
+                    content: "single",
+                },
+                Token {
+                    kind: CloseParen,
+                    range: (
+                        7,
+                        8,
+                    ),
+                    content: ")",
+                },
+            ],
+        )
+        "###);
+    }
+
+    #[rstest]
+    fn test_parse_sexp_double() {
+        assert_debug_snapshot!(parse_sexp("(one two)"), @r###"
+        Ok(
+            [
+                Token {
+                    kind: OpenParen,
+                    range: (
+                        0,
+                        1,
+                    ),
+                    content: "(",
+                },
+                Token {
+                    kind: Symbol,
+                    range: (
+                        1,
+                        2,
+                    ),
+                    content: "one",
+                },
+                Token {
+                    kind: Symbol,
+                    range: (
+                        5,
+                        6,
+                    ),
+                    content: "two",
+                },
+                Token {
+                    kind: CloseParen,
+                    range: (
+                        8,
+                        9,
+                    ),
+                    content: ")",
+                },
+            ],
+        )
+        "###);
+    }
+
+    #[rstest]
+    fn test_parse_sexp_addition() {
+        assert_debug_snapshot!(parse_sexp("(+ 1 2)"), @r###"
+        Ok(
+            [
+                Token {
+                    kind: OpenParen,
+                    range: (
+                        0,
+                        1,
+                    ),
+                    content: "(",
+                },
+                Token {
+                    kind: Symbol,
+                    range: (
+                        1,
+                        2,
+                    ),
+                    content: "+",
+                },
+                Token {
+                    kind: Symbol,
+                    range: (
+                        3,
+                        4,
+                    ),
+                    content: "1",
+                },
+                Token {
+                    kind: Symbol,
+                    range: (
+                        5,
+                        6,
+                    ),
+                    content: "2",
+                },
+                Token {
+                    kind: CloseParen,
+                    range: (
+                        6,
+                        7,
+                    ),
+                    content: ")",
+                },
+            ],
+        )
+        "###);
+    }
+
+    #[rstest]
+    fn test_parse_sexp_addition_nested() {
+        assert_debug_snapshot!(parse_sexp("(+ 1 (+ 2 3))"),@r###"
+        Ok(
+            [
+                Token {
+                    kind: OpenParen,
+                    range: (
+                        0,
+                        1,
+                    ),
+                    content: "(",
+                },
+                Token {
+                    kind: Symbol,
+                    range: (
+                        1,
+                        2,
+                    ),
+                    content: "+",
+                },
+                Token {
+                    kind: Symbol,
+                    range: (
+                        3,
+                        4,
+                    ),
+                    content: "1",
+                },
+                Token {
+                    kind: OpenParen,
+                    range: (
+                        5,
+                        6,
+                    ),
+                    content: "(",
+                },
+                Token {
+                    kind: Symbol,
+                    range: (
+                        6,
+                        7,
+                    ),
+                    content: "+",
+                },
+                Token {
+                    kind: Symbol,
+                    range: (
+                        8,
+                        9,
+                    ),
+                    content: "2",
+                },
+                Token {
+                    kind: Symbol,
+                    range: (
+                        10,
+                        11,
+                    ),
+                    content: "3",
+                },
+                Token {
+                    kind: CloseParen,
+                    range: (
+                        11,
+                        12,
+                    ),
+                    content: ")",
+                },
+                Token {
+                    kind: CloseParen,
+                    range: (
+                        12,
+                        13,
+                    ),
+                    content: ")",
+                },
+            ],
+        )
+        "###);
+    }
+
+    #[rstest]
+    fn test_parse_sexp_addition_nested_doule() {
+        assert_debug_snapshot!(parse_sexp("(+ 1 (+ 2 3) (+ 4 5))"), @r###"
+        Ok(
+            [
+                Token {
+                    kind: OpenParen,
+                    range: (
+                        0,
+                        1,
+                    ),
+                    content: "(",
+                },
+                Token {
+                    kind: Symbol,
+                    range: (
+                        1,
+                        2,
+                    ),
+                    content: "+",
+                },
+                Token {
+                    kind: Symbol,
+                    range: (
+                        3,
+                        4,
+                    ),
+                    content: "1",
+                },
+                Token {
+                    kind: OpenParen,
+                    range: (
+                        5,
+                        6,
+                    ),
+                    content: "(",
+                },
+                Token {
+                    kind: Symbol,
+                    range: (
+                        6,
+                        7,
+                    ),
+                    content: "+",
+                },
+                Token {
+                    kind: Symbol,
+                    range: (
+                        8,
+                        9,
+                    ),
+                    content: "2",
+                },
+                Token {
+                    kind: Symbol,
+                    range: (
+                        10,
+                        11,
+                    ),
+                    content: "3",
+                },
+                Token {
+                    kind: CloseParen,
+                    range: (
+                        11,
+                        12,
+                    ),
+                    content: ")",
+                },
+                Token {
+                    kind: OpenParen,
+                    range: (
+                        13,
+                        14,
+                    ),
+                    content: "(",
+                },
+                Token {
+                    kind: Symbol,
+                    range: (
+                        14,
+                        15,
+                    ),
+                    content: "+",
+                },
+                Token {
+                    kind: Symbol,
+                    range: (
+                        16,
+                        17,
+                    ),
+                    content: "4",
+                },
+                Token {
+                    kind: Symbol,
+                    range: (
+                        18,
+                        19,
+                    ),
+                    content: "5",
+                },
+                Token {
+                    kind: CloseParen,
+                    range: (
+                        19,
+                        20,
+                    ),
+                    content: ")",
+                },
+                Token {
+                    kind: CloseParen,
+                    range: (
+                        20,
+                        21,
+                    ),
+                    content: ")",
+                },
+            ],
+        )
+        "###);
+    }
+
+    #[rstest]
+    fn test_parse_sexp_symbols() {
+        assert_debug_snapshot!(parse_sexp("(fn symbol 4 \"string\")"), @r###"
+        Ok(
+            [
+                Token {
+                    kind: OpenParen,
+                    range: (
+                        0,
+                        1,
+                    ),
+                    content: "(",
+                },
+                Token {
+                    kind: Symbol,
+                    range: (
+                        1,
+                        2,
+                    ),
+                    content: "fn",
+                },
+                Token {
+                    kind: Symbol,
+                    range: (
+                        4,
+                        5,
+                    ),
+                    content: "symbol",
+                },
+                Token {
+                    kind: Symbol,
+                    range: (
+                        11,
+                        12,
+                    ),
+                    content: "4",
+                },
+                Token {
+                    kind: String,
+                    range: (
+                        14,
+                        20,
+                    ),
+                    content: "string",
+                },
+                Token {
+                    kind: CloseParen,
+                    range: (
+                        21,
+                        22,
+                    ),
+                    content: ")",
+                },
+            ],
+        )
+        "###);
+    }
+
+    #[rstest]
+    fn test_parse_sexp_symbols_2() {
+        assert_debug_snapshot!(parse_sexp("(fn symbol \"string\" :atom)"), @r###"
+        Ok(
+            [
+                Token {
+                    kind: OpenParen,
+                    range: (
+                        0,
+                        1,
+                    ),
+                    content: "(",
+                },
+                Token {
+                    kind: Symbol,
+                    range: (
+                        1,
+                        2,
+                    ),
+                    content: "fn",
+                },
+                Token {
+                    kind: Symbol,
+                    range: (
+                        4,
+                        5,
+                    ),
+                    content: "symbol",
+                },
+                Token {
+                    kind: String,
+                    range: (
+                        12,
+                        18,
+                    ),
+                    content: "string",
+                },
+                Token {
+                    kind: Symbol,
+                    range: (
+                        20,
+                        21,
+                    ),
+                    content: ":atom",
+                },
+                Token {
+                    kind: CloseParen,
+                    range: (
+                        25,
+                        26,
+                    ),
+                    content: ")",
+                },
+            ],
+        )
+        "###);
     }
 }
