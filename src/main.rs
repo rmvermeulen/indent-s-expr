@@ -1,4 +1,6 @@
-
+#[cfg(test)]
+#[allow(clippy::single_component_path_imports)]
+use rstest_reuse;
 
 use std::fs::read_to_string;
 use tree_sitter::Parser;
@@ -11,17 +13,48 @@ fn main() {
 
     let tree = parser.parse(&source, None).unwrap();
 
-    println!("-----------------");
-
     let sexp = tree.root_node().to_sexp();
     println!("{}", &sexp[0..100]);
 
-    println!("-----------------");
+    let sexp = Sexp(parse_sexp(sexp.as_str()).unwrap());
+    println!("{}", sexp.indented(2));
+}
 
-    let sexp = indent_sexp(&sexp);
-    println!("{}", &sexp[0..100]);
+#[derive(Debug)]
+struct Sexp<'a>(Vec<Token<'a>>);
 
-    println!("-----------------");
+impl Sexp<'_> {
+    pub fn tokens(&self) -> &Vec<Token> {
+        &self.0
+    }
+
+    fn indented(&self, tabsize: usize) -> String {
+        let indent = " ".repeat(tabsize);
+        let mut current_indent = 0;
+        let mut result = String::new();
+        for token in self.0.iter() {
+            match token.kind {
+                TokenKind::OpenParen => {
+                    result += &format!("{}(\n", indent.repeat(current_indent));
+                    current_indent += 1;
+                }
+                TokenKind::CloseParen => {
+                    current_indent -= 1;
+                    result += &format!("{})\n", indent.repeat(current_indent));
+                }
+                TokenKind::Symbol => {
+                    result += &format!("{}{}\n", indent.repeat(current_indent), token.content);
+                }
+                TokenKind::Number => {
+                    result += &format!("{}{}\n", indent.repeat(current_indent), token.content);
+                }
+                TokenKind::String => {
+                    result += &format!("{}{}\n", indent.repeat(current_indent), token.content);
+                }
+            }
+        }
+        result
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -50,7 +83,6 @@ struct Line<'a> {
 pub struct NotSexprError;
 
 fn parse_sexp(sexp: &str) -> Result<Vec<Token>, NotSexprError> {
-    println!("parsing sexp: {:?}", sexp);
     let mut tokens = vec![];
     let mut token = None;
     let mut inside_string = false;
@@ -65,13 +97,13 @@ fn parse_sexp(sexp: &str) -> Result<Vec<Token>, NotSexprError> {
                     content: &sexp[i..i + 1],
                     range: (i, i + 1),
                 };
-                println!("( pushing token: {:?}", next_token);
+
                 tokens.push(next_token);
             }
             ')' => {
                 if let Some(mut token) = token.take() {
                     token.content = &sexp[token.range.0..i];
-                    println!(") pushing token: {:?}", token);
+
                     tokens.push(token);
                 }
                 let next_token = Token {
@@ -79,7 +111,7 @@ fn parse_sexp(sexp: &str) -> Result<Vec<Token>, NotSexprError> {
                     content: sexp[i..i + 1].as_ref(),
                     range: (i, i + 1),
                 };
-                println!(") pushing token: {:?}", next_token);
+
                 tokens.push(next_token);
             }
             ' ' | '\n' | '\t' => {
@@ -89,14 +121,14 @@ fn parse_sexp(sexp: &str) -> Result<Vec<Token>, NotSexprError> {
                     token.content = &sexp[token.range.0..i];
                 } else if let Some(mut token) = token.take() {
                     token.content = &sexp[token.range.0..i];
-                    println!("\\s pushing token: {:?}", token);
+
                     tokens.push(token);
                 }
             }
             '"' => {
                 if inside_string {
                     let token: Token = token.take().expect("token should exist inside string");
-                    println!("\" pushing token: {:?}", token);
+
                     tokens.push(Token {
                         kind: TokenKind::String,
                         content: &sexp[token.range.0..i],
@@ -110,13 +142,11 @@ fn parse_sexp(sexp: &str) -> Result<Vec<Token>, NotSexprError> {
                         range: (i + 1, i + 1),
                     });
                     inside_string = true;
-                    println!("start string: {:?}", token);
                 }
             }
             _ => {
                 if let Some(token) = token.as_mut() {
                     token.content = &sexp[token.range.0..i];
-                    println!("_ updated token.content: '{:?}'", token.content);
                 } else {
                     token = Some(Token {
                         kind: TokenKind::Symbol,
@@ -134,17 +164,13 @@ fn parse_sexp(sexp: &str) -> Result<Vec<Token>, NotSexprError> {
     Ok(tokens)
 }
 
-fn indent_sexp(sexp: &str) -> String {
-    unimplemented!("index_sexp(sexp)");
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use insta::assert_debug_snapshot;
     use rstest::rstest;
-    
-    
+    use rstest_reuse::{self, *};
+    use speculoos::prelude::*;
 
     #[rstest]
     fn test_parse_sexp_empty() {
@@ -163,8 +189,7 @@ mod tests {
 
     #[rstest]
     fn test_parse_sexp_addition() {
-        assert_debug_snapshot!(parse_sexp("(+ 1 2)")
-       );
+        assert_debug_snapshot!(parse_sexp("(+ 1 2)"));
     }
 
     #[rstest]
