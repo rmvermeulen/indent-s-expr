@@ -1,6 +1,6 @@
 ---
 source: src/lib.rs
-expression: "parse_sexp(\"(+ 1 26)\")"
+expression: "parse_sexp(r#\"(join \"abc\\\"\" \"\\\"def\")\"#)"
 ---
 Ok(
     [
@@ -18,29 +18,29 @@ Ok(
                 1,
                 2,
             ),
-            content: "+",
+            content: "join",
         },
         Token {
-            kind: Number,
+            kind: String,
             range: (
-                3,
-                4,
+                7,
+                12,
             ),
-            content: "1",
+            content: "abc\\\"",
         },
         Token {
-            kind: Number,
+            kind: String,
             range: (
-                5,
-                6,
+                15,
+                20,
             ),
-            content: "26",
+            content: "\\\"def",
         },
         Token {
             kind: CloseParen,
             range: (
-                7,
-                8,
+                21,
+                22,
             ),
             content: ")",
         },

@@ -1,6 +1,6 @@
 ---
 source: src/lib.rs
-expression: "parse_sexp(\"(+ 1 (+ 2 3) (+ 4 5))\")"
+expression: "parse_sexp(\"(+ 10 (+ 22 31) (+ 47 52))\")"
 ---
 Ok(
     [
@@ -26,93 +26,93 @@ Ok(
                 3,
                 4,
             ),
-            content: "1",
+            content: "10",
         },
         Token {
             kind: OpenParen,
-            range: (
-                5,
-                6,
-            ),
-            content: "(",
-        },
-        Token {
-            kind: Symbol,
             range: (
                 6,
                 7,
             ),
+            content: "(",
+        },
+        Token {
+            kind: Symbol,
+            range: (
+                7,
+                8,
+            ),
             content: "+",
         },
         Token {
             kind: Number,
             range: (
-                8,
                 9,
+                10,
             ),
-            content: "2",
+            content: "22",
         },
         Token {
             kind: Number,
             range: (
-                10,
-                11,
+                12,
+                13,
             ),
-            content: "3",
+            content: "31",
         },
         Token {
             kind: CloseParen,
             range: (
-                11,
-                12,
+                14,
+                15,
             ),
             content: ")",
         },
         Token {
             kind: OpenParen,
             range: (
-                13,
-                14,
+                16,
+                17,
             ),
             content: "(",
         },
         Token {
             kind: Symbol,
             range: (
-                14,
-                15,
+                17,
+                18,
             ),
             content: "+",
         },
         Token {
             kind: Number,
             range: (
-                16,
-                17,
+                19,
+                20,
             ),
-            content: "4",
+            content: "47",
         },
         Token {
             kind: Number,
             range: (
-                18,
-                19,
+                22,
+                23,
             ),
-            content: "5",
+            content: "52",
         },
         Token {
             kind: CloseParen,
             range: (
-                19,
-                20,
+                24,
+                25,
             ),
             content: ")",
         },
         Token {
             kind: CloseParen,
             range: (
-                20,
-                21,
+                25,
+                26,
             ),
             content: ")",
         },

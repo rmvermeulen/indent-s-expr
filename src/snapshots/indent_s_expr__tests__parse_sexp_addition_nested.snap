@@ -1,6 +1,6 @@
 ---
 source: src/lib.rs
-expression: "parse_sexp(\"(+ 1 (+ 2 3))\")"
+expression: "parse_sexp(\"(+ 10 (+ 82 43))\")"
 ---
 Ok(
     [
@@ -26,53 +26,53 @@ Ok(
                 3,
                 4,
             ),
-            content: "1",
+            content: "10",
         },
         Token {
             kind: OpenParen,
             range: (
-                5,
                 6,
+                7,
             ),
             content: "(",
         },
         Token {
             kind: Symbol,
             range: (
-                6,
                 7,
+                8,
             ),
             content: "+",
         },
         Token {
             kind: Number,
             range: (
-                8,
                 9,
+                10,
             ),
-            content: "2",
+            content: "82",
         },
         Token {
             kind: Number,
             range: (
-                10,
-                11,
+                12,
+                13,
             ),
-            content: "3",
+            content: "43",
         },
         Token {
             kind: CloseParen,
             range: (
-                11,
-                12,
+                14,
+                15,
             ),
             content: ")",
         },
         Token {
             kind: CloseParen,
             range: (
-                12,
-                13,
+                15,
+                16,
             ),
             content: ")",
         },

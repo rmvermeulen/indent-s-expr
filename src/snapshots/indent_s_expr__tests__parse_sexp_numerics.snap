@@ -1,6 +1,6 @@
 ---
 source: src/lib.rs
-expression: "parse_sexp(\"(+ 1 26)\")"
+expression: "parse_sexp(\"(+ 123ax ax123)\")"
 ---
 Ok(
     [
@@ -26,21 +26,21 @@ Ok(
                 3,
                 4,
             ),
-            content: "1",
+            content: "123ax",
         },
         Token {
-            kind: Number,
+            kind: Symbol,
             range: (
-                5,
-                6,
+                9,
+                10,
             ),
-            content: "26",
+            content: "ax123",
         },
         Token {
             kind: CloseParen,
             range: (
-                7,
-                8,
+                14,
+                15,
             ),
             content: ")",
         },

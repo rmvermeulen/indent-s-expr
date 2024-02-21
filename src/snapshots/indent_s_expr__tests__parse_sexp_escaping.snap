@@ -1,6 +1,6 @@
 ---
 source: src/lib.rs
-expression: "parse_sexp(\"(+ 1 26)\")"
+expression: "parse_sexp(r#\"(\\a)\"#)"
 ---
 Ok(
     [
@@ -15,32 +15,16 @@ Ok(
         Token {
             kind: Symbol,
             range: (
-                1,
                 2,
-            ),
-            content: "+",
-        },
-        Token {
-            kind: Number,
-            range: (
                 3,
-                4,
             ),
-            content: "1",
-        },
-        Token {
-            kind: Number,
-            range: (
-                5,
-                6,
-            ),
-            content: "26",
+            content: "a",
         },
         Token {
             kind: CloseParen,
             range: (
-                7,
-                8,
+                3,
+                4,
             ),
             content: ")",
         },

@@ -1,0 +1,7 @@
+---
+source: src/lib.rs
+expression: "indent_sexp(\"(one (two) (+ 1 :atom) \\\"string\\\")\", 2)"
+---
+Ok(
+    "(\n  one\n  (\n    two\n  )\n  (\n    +\n    1\n    :atom\n  )\n  string\n)\n",
+)

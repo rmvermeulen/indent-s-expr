@@ -1,6 +1,6 @@
 ---
 source: src/lib.rs
-expression: "parse_sexp(\"(+ 1 26)\")"
+expression: "parse_sexp(r#\"(fn \"string with\\ spaces\")\"#)"
 ---
 Ok(
     [
@@ -18,29 +18,21 @@ Ok(
                 1,
                 2,
             ),
-            content: "+",
+            content: "fn",
         },
         Token {
-            kind: Number,
-            range: (
-                3,
-                4,
-            ),
-            content: "1",
-        },
-        Token {
-            kind: Number,
+            kind: String,
             range: (
                 5,
-                6,
+                24,
             ),
-            content: "26",
+            content: "string with\\ spaces",
         },
         Token {
             kind: CloseParen,
             range: (
-                7,
-                8,
+                25,
+                26,
             ),
             content: ")",
         },

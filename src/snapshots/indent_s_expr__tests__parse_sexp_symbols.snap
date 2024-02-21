@@ -1,6 +1,6 @@
 ---
 source: src/lib.rs
-expression: "parse_sexp(\"(fn symbol 4 \\\"string\\\")\")"
+expression: "parse_sexp(r#\"(fn \"string\" \"string with spaces\")\"#)"
 ---
 Ok(
     [
@@ -21,34 +21,26 @@ Ok(
             content: "fn",
         },
         Token {
-            kind: Symbol,
+            kind: String,
             range: (
-                4,
                 5,
-            ),
-            content: "symbol",
-        },
-        Token {
-            kind: Number,
-            range: (
                 11,
-                12,
             ),
-            content: "4",
+            content: "string",
         },
         Token {
             kind: String,
             range: (
                 14,
-                20,
+                32,
             ),
-            content: "string",
+            content: "string with spaces",
         },
         Token {
             kind: CloseParen,
             range: (
-                21,
-                22,
+                33,
+                34,
             ),
             content: ")",
         },

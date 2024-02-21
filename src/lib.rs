@@ -62,9 +62,27 @@ pub struct NotSexprError;
 
 fn parse_sexp(sexp: &str) -> Result<Vec<Token>, NotSexprError> {
     let mut tokens = vec![];
-    let mut token = None;
+    let mut token: Option<Token<'_>> = None;
+    let mut escaped = false;
     let mut inside_string = false;
     for (i, c) in sexp.chars().enumerate() {
+        if escaped {
+            escaped = false;
+            if let Some(token) = token.as_mut() {
+                token.content = &sexp[token.range.0..i];
+            } else {
+                token = Some(Token {
+                    kind: if c.is_ascii_digit() {
+                        TokenKind::Number
+                    } else {
+                        TokenKind::Symbol
+                    },
+                    content: &sexp[i..i + 1],
+                    range: (i, i + 1),
+                });
+            }
+            continue;
+        }
         match c {
             '(' => {
                 if let Some(token) = token.take() {
@@ -117,6 +135,10 @@ fn parse_sexp(sexp: &str) -> Result<Vec<Token>, NotSexprError> {
                     inside_string = true;
                 }
             }
+            '\\' => {
+                assert!(!escaped, "cannot escape twice");
+                escaped = true;
+            }
             c => {
                 if let Some(token) = token.as_mut() {
                     token.content = &sexp[token.range.0..i];
@@ -148,8 +170,39 @@ mod tests {
     use rstest::rstest;
 
     #[rstest]
+    fn test_indent_sexp_directly() {
+        assert_debug_snapshot!(indent_sexp(r#"(one (two) (+ 1 :atom) "string")"#, 2));
+    }
+
+    #[rstest]
+    fn test_parse_sexp_nested_string() {
+        assert_debug_snapshot!(parse_sexp(r#"(join "abc\"" "\"def")"#));
+    }
+
+    #[rstest]
+    fn test_parse_empty_string() {
+        assert_debug_snapshot!(parse_sexp(""));
+    }
+
+    #[rstest]
+    fn test_parse_partial_sexp() {
+        assert_debug_snapshot!(parse_sexp("(+ 1 2 3"));
+    }
+
+    #[rstest]
+    fn test_parse_sexp_numerics() {
+        assert_debug_snapshot!(parse_sexp("(+ 123ax ax123)"));
+        assert_debug_snapshot!(parse_sexp("(+ 123ax(ax123))"));
+    }
+
+    #[rstest]
     fn test_parse_sexp_empty() {
         assert_debug_snapshot!(parse_sexp("()"));
+    }
+
+    #[rstest]
+    fn test_parse_sexp_empty_nested() {
+        assert_debug_snapshot!(parse_sexp("(())"));
     }
 
     #[rstest]
@@ -164,26 +217,37 @@ mod tests {
 
     #[rstest]
     fn test_parse_sexp_addition() {
-        assert_debug_snapshot!(parse_sexp("(+ 1 2)"));
+        assert_debug_snapshot!(parse_sexp("(+ 1 26)"));
     }
 
     #[rstest]
     fn test_parse_sexp_addition_nested() {
-        assert_debug_snapshot!(parse_sexp("(+ 1 (+ 2 3))"));
+        assert_debug_snapshot!(parse_sexp("(+ 10 (+ 82 43))"));
+    }
+
+    #[rstest]
+    fn test_parse_sexp_escaping() {
+        assert_debug_snapshot!(parse_sexp(r#"(\a)"#));
+        assert_debug_snapshot!(parse_sexp(r#"(\1)"#));
+        assert_debug_snapshot!(parse_sexp(r#"(\\)"#));
+        assert_debug_snapshot!(parse_sexp(r#"(\\\)"#));
+        assert_debug_snapshot!(parse_sexp(r#"(\\\\)"#));
+        assert_debug_snapshot!(parse_sexp(r#"(\\\\\)"#));
+        assert_debug_snapshot!(parse_sexp(r#"(fn "string with\ spaces")"#));
     }
 
     #[rstest]
     fn test_parse_sexp_addition_nested_doule() {
-        assert_debug_snapshot!(parse_sexp("(+ 1 (+ 2 3) (+ 4 5))"));
+        assert_debug_snapshot!(parse_sexp("(+ 10 (+ 22 31) (+ 47 52))"));
     }
 
     #[rstest]
     fn test_parse_sexp_symbols() {
-        assert_debug_snapshot!(parse_sexp("(fn symbol 4 \"string\")"));
+        assert_debug_snapshot!(parse_sexp(r#"(fn "string" "string with spaces")"#));
     }
 
     #[rstest]
     fn test_parse_sexp_symbols_atom() {
-        assert_debug_snapshot!(parse_sexp("(fn symbol \"string\" :atom)"));
+        assert_debug_snapshot!(parse_sexp("(fn symbol :atom)"));
     }
 }

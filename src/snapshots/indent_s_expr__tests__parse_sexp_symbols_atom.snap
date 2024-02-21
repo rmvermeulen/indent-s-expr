@@ -1,6 +1,6 @@
 ---
 source: src/lib.rs
-expression: "parse_sexp(\"(fn symbol \\\"string\\\" :atom)\")"
+expression: "parse_sexp(\"(fn symbol :atom)\")"
 ---
 Ok(
     [
@@ -29,26 +29,18 @@ Ok(
             content: "symbol",
         },
         Token {
-            kind: String,
-            range: (
-                12,
-                18,
-            ),
-            content: "string",
-        },
-        Token {
             kind: Symbol,
             range: (
-                20,
-                21,
+                11,
+                12,
             ),
             content: ":atom",
         },
         Token {
             kind: CloseParen,
             range: (
-                25,
-                26,
+                16,
+                17,
             ),
             content: ")",
         },
