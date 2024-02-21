@@ -1,0 +1,80 @@
+---
+source: src/main.rs
+expression: "parse_sexp(\"(+ 1 (+ 2 3))\")"
+---
+Ok(
+    [
+        Token {
+            kind: OpenParen,
+            range: (
+                0,
+                1,
+            ),
+            content: "(",
+        },
+        Token {
+            kind: Symbol,
+            range: (
+                1,
+                2,
+            ),
+            content: "+",
+        },
+        Token {
+            kind: Symbol,
+            range: (
+                3,
+                4,
+            ),
+            content: "1",
+        },
+        Token {
+            kind: OpenParen,
+            range: (
+                5,
+                6,
+            ),
+            content: "(",
+        },
+        Token {
+            kind: Symbol,
+            range: (
+                6,
+                7,
+            ),
+            content: "+",
+        },
+        Token {
+            kind: Symbol,
+            range: (
+                8,
+                9,
+            ),
+            content: "2",
+        },
+        Token {
+            kind: Symbol,
+            range: (
+                10,
+                11,
+            ),
+            content: "3",
+        },
+        Token {
+            kind: CloseParen,
+            range: (
+                11,
+                12,
+            ),
+            content: ")",
+        },
+        Token {
+            kind: CloseParen,
+            range: (
+                12,
+                13,
+            ),
+            content: ")",
+        },
+    ],
+)

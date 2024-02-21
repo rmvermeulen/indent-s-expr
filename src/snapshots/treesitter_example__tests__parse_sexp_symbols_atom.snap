@@ -1,0 +1,56 @@
+---
+source: src/main.rs
+expression: "parse_sexp(\"(fn symbol \\\"string\\\" :atom)\")"
+---
+Ok(
+    [
+        Token {
+            kind: OpenParen,
+            range: (
+                0,
+                1,
+            ),
+            content: "(",
+        },
+        Token {
+            kind: Symbol,
+            range: (
+                1,
+                2,
+            ),
+            content: "fn",
+        },
+        Token {
+            kind: Symbol,
+            range: (
+                4,
+                5,
+            ),
+            content: "symbol",
+        },
+        Token {
+            kind: String,
+            range: (
+                12,
+                18,
+            ),
+            content: "string",
+        },
+        Token {
+            kind: Symbol,
+            range: (
+                20,
+                21,
+            ),
+            content: ":atom",
+        },
+        Token {
+            kind: CloseParen,
+            range: (
+                25,
+                26,
+            ),
+            content: ")",
+        },
+    ],
+)

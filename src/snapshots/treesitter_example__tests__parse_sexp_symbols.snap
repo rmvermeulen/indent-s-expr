@@ -1,0 +1,56 @@
+---
+source: src/main.rs
+expression: "parse_sexp(\"(fn symbol 4 \\\"string\\\")\")"
+---
+Ok(
+    [
+        Token {
+            kind: OpenParen,
+            range: (
+                0,
+                1,
+            ),
+            content: "(",
+        },
+        Token {
+            kind: Symbol,
+            range: (
+                1,
+                2,
+            ),
+            content: "fn",
+        },
+        Token {
+            kind: Symbol,
+            range: (
+                4,
+                5,
+            ),
+            content: "symbol",
+        },
+        Token {
+            kind: Symbol,
+            range: (
+                11,
+                12,
+            ),
+            content: "4",
+        },
+        Token {
+            kind: String,
+            range: (
+                14,
+                20,
+            ),
+            content: "string",
+        },
+        Token {
+            kind: CloseParen,
+            range: (
+                21,
+                22,
+            ),
+            content: ")",
+        },
+    ],
+)
