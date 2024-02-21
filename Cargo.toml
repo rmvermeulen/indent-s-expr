@@ -1,5 +1,5 @@
 [package]
-name = "indent-s-expr"
+name = "indent_s_expr"
 version = "1.0.0"
 edition = "2021"
 description = "Dumb-as-rocks S-expression indenter"
