@@ -21,7 +21,7 @@ Ok(
             content: "+",
         },
         Token {
-            kind: Symbol,
+            kind: Number,
             range: (
                 3,
                 4,
@@ -45,7 +45,7 @@ Ok(
             content: "+",
         },
         Token {
-            kind: Symbol,
+            kind: Number,
             range: (
                 8,
                 9,
@@ -53,7 +53,7 @@ Ok(
             content: "2",
         },
         Token {
-            kind: Symbol,
+            kind: Number,
             range: (
                 10,
                 11,
@@ -85,7 +85,7 @@ Ok(
             content: "+",
         },
         Token {
-            kind: Symbol,
+            kind: Number,
             range: (
                 16,
                 17,
@@ -93,7 +93,7 @@ Ok(
             content: "4",
         },
         Token {
-            kind: Symbol,
+            kind: Number,
             range: (
                 18,
                 19,

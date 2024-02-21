@@ -1,29 +1,11 @@
-use std::fs::read_to_string;
-use tree_sitter::Parser;
-
-fn main() {
-    let mut parser = Parser::new();
-    parser.set_language(tree_sitter_rust::language()).unwrap();
-
-    let source = read_to_string("src/main.rs").unwrap();
-
-    let tree = parser.parse(&source, None).unwrap();
-
-    let sexp = tree.root_node().to_sexp();
-    println!("{}", &sexp[0..100]);
-
-    let sexp = Sexp(parse_sexp(sexp.as_str()).unwrap());
-    println!("{}", sexp.indented(2));
+pub fn indent_sexp(sexp: &str, tabsize: usize) -> Result<String, NotSexprError> {
+    parse_sexp(sexp).map(|tokens| Sexp(tokens).indented(tabsize))
 }
 
 #[derive(Debug)]
-struct Sexp<'a>(Vec<Token<'a>>);
+pub struct Sexp<'a>(Vec<Token<'a>>);
 
 impl Sexp<'_> {
-    pub fn tokens(&self) -> &Vec<Token> {
-        &self.0
-    }
-
     fn indented(&self, tabsize: usize) -> String {
         let indent = " ".repeat(tabsize);
         let mut current_indent = 0;
@@ -53,7 +35,7 @@ impl Sexp<'_> {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 enum TokenKind {
     OpenParen,
     CloseParen,
@@ -93,13 +75,11 @@ fn parse_sexp(sexp: &str) -> Result<Vec<Token>, NotSexprError> {
                     content: &sexp[i..i + 1],
                     range: (i, i + 1),
                 };
-
                 tokens.push(next_token);
             }
             ')' => {
                 if let Some(mut token) = token.take() {
                     token.content = &sexp[token.range.0..i];
-
                     tokens.push(token);
                 }
                 let next_token = Token {
@@ -107,7 +87,6 @@ fn parse_sexp(sexp: &str) -> Result<Vec<Token>, NotSexprError> {
                     content: sexp[i..i + 1].as_ref(),
                     range: (i, i + 1),
                 };
-
                 tokens.push(next_token);
             }
             ' ' | '\n' | '\t' => {
@@ -117,14 +96,12 @@ fn parse_sexp(sexp: &str) -> Result<Vec<Token>, NotSexprError> {
                     token.content = &sexp[token.range.0..i];
                 } else if let Some(mut token) = token.take() {
                     token.content = &sexp[token.range.0..i];
-
                     tokens.push(token);
                 }
             }
             '"' => {
                 if inside_string {
                     let token: Token = token.take().expect("token should exist inside string");
-
                     tokens.push(Token {
                         kind: TokenKind::String,
                         content: &sexp[token.range.0..i],
@@ -140,12 +117,16 @@ fn parse_sexp(sexp: &str) -> Result<Vec<Token>, NotSexprError> {
                     inside_string = true;
                 }
             }
-            _ => {
+            c => {
                 if let Some(token) = token.as_mut() {
                     token.content = &sexp[token.range.0..i];
                 } else {
                     token = Some(Token {
-                        kind: TokenKind::Symbol,
+                        kind: if c.is_ascii_digit() {
+                            TokenKind::Number
+                        } else {
+                            TokenKind::Symbol
+                        },
                         content: &sexp[i..i + 1],
                         range: (i, i + 1),
                     });

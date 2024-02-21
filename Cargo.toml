@@ -3,10 +3,10 @@ name = "indent-s-expr"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+crate-type = ["cdylib"]
+
 [dependencies]
 insta = "1.35.1"
 rstest = "0.18.2"
 rstest_reuse = "0.6.0"
-speculoos = "0.11.0"
-tree-sitter = "0.20.10"
-tree-sitter-rust = "0.20.4"

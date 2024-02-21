@@ -29,7 +29,7 @@ Ok(
             content: "symbol",
         },
         Token {
-            kind: Symbol,
+            kind: Number,
             range: (
                 11,
                 12,
