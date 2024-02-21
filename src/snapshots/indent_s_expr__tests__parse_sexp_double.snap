@@ -1,0 +1,40 @@
+---
+source: src/lib.rs
+expression: "parse_sexp(\"(one two)\")"
+---
+Ok(
+    [
+        Token {
+            kind: OpenParen,
+            range: (
+                0,
+                1,
+            ),
+            content: "(",
+        },
+        Token {
+            kind: Symbol,
+            range: (
+                1,
+                2,
+            ),
+            content: "one",
+        },
+        Token {
+            kind: Symbol,
+            range: (
+                5,
+                6,
+            ),
+            content: "two",
+        },
+        Token {
+            kind: CloseParen,
+            range: (
+                8,
+                9,
+            ),
+            content: ")",
+        },
+    ],
+)

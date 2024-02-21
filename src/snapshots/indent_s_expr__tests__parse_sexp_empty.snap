@@ -1,0 +1,24 @@
+---
+source: src/lib.rs
+expression: "parse_sexp(\"()\")"
+---
+Ok(
+    [
+        Token {
+            kind: OpenParen,
+            range: (
+                0,
+                1,
+            ),
+            content: "(",
+        },
+        Token {
+            kind: CloseParen,
+            range: (
+                1,
+                2,
+            ),
+            content: ")",
+        },
+    ],
+)
