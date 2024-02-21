@@ -61,21 +61,25 @@ fn parse_sexp(sexp: &str) -> Result<Vec<Token>, NotSexprError> {
                 if let Some(token) = token.take() {
                     tokens.push(token);
                 }
-                tokens.push(Token {
+                let next_token = Token {
                     kind: TokenKind::OpenParen,
-                    content: sexp[i..i + 1].as_ref(),
+                    content: &sexp[i..i + 1],
                     range: (i, i + 1),
-                });
+                };
+                println!("pushing token: {:?}", next_token);
+                tokens.push(next_token);
             }
             ')' => {
                 if let Some(token) = token.take() {
                     tokens.push(token);
                 }
-                tokens.push(Token {
+                let next_token = Token {
                     kind: TokenKind::CloseParen,
                     content: sexp[i..i + 1].as_ref(),
                     range: (i, i + 1),
-                });
+                };
+                println!("pushing token: {:?}", next_token);
+                tokens.push(next_token);
             }
             ' ' | '\n' | '\t' => {
                 if inside_string {
@@ -83,12 +87,14 @@ fn parse_sexp(sexp: &str) -> Result<Vec<Token>, NotSexprError> {
                         token.as_mut().expect("token should exist inside string");
                     token.content = &sexp[token.content.len()..i];
                 } else if let Some(token) = token.take() {
+                    println!("pushing token: {:?}", token);
                     tokens.push(token);
                 }
             }
             '"' => {
                 if inside_string {
                     let token: Token = token.take().expect("token should exist inside string");
+                    println!("pushing token: {:?}", token);
                     tokens.push(Token {
                         kind: TokenKind::String,
                         content: token.content,
@@ -107,6 +113,7 @@ fn parse_sexp(sexp: &str) -> Result<Vec<Token>, NotSexprError> {
             _ => {
                 if let Some(token) = token.as_mut() {
                     token.content = &sexp[token.content.len()..i];
+                    println!("updated token.content: '{:?}'", token.content);
                 } else {
                     token = Some(Token {
                         kind: TokenKind::Symbol,
@@ -117,6 +124,10 @@ fn parse_sexp(sexp: &str) -> Result<Vec<Token>, NotSexprError> {
             }
         }
     }
+    if token.is_some() {
+        return Err(NotSexprError);
+    }
+
     Ok(tokens)
 }
 
