@@ -1,12 +1,12 @@
 [package]
 name = "indent-s-expr"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib"]
 
-[dependencies]
+[dev-dependencies]
 insta = "1.35.1"
 rstest = "0.18.2"
 rstest_reuse = "0.6.0"
