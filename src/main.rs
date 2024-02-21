@@ -1,7 +1,3 @@
-#[cfg(test)]
-#[allow(clippy::single_component_path_imports)]
-use rstest_reuse;
-
 use std::fs::read_to_string;
 use tree_sitter::Parser;
 
@@ -169,8 +165,6 @@ mod tests {
     use super::*;
     use insta::assert_debug_snapshot;
     use rstest::rstest;
-    use rstest_reuse::{self, *};
-    use speculoos::prelude::*;
 
     #[rstest]
     fn test_parse_sexp_empty() {
