@@ -1,5 +1,6 @@
-pub fn indent_sexp(sexp: &str, tabsize: usize) -> Result<String, NotSexprError> {
-    parse_sexp(sexp).map(|tokens| Sexp(tokens).indented(tabsize))
+pub fn indent_sexp<S: AsRef<str>>(sexp: S, tabsize: usize) -> Result<String, NotSexprError> {
+    let tokens = parse_sexp(sexp.as_ref())?;
+    Ok(Sexp(tokens).indented(tabsize))
 }
 
 #[derive(Debug)]
