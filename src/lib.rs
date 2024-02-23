@@ -1,4 +1,4 @@
-pub fn indent_sexp<S: AsRef<str>>(sexp: S, tabsize: usize) -> Result<String, NotSexprError> {
+pub fn indent_s_expr<S: AsRef<str>>(sexp: S, tabsize: usize) -> Result<String, NotSexprError> {
     let tokens = parse_sexp(sexp.as_ref())?;
     Ok(Sexp(tokens).indented(tabsize))
 }
@@ -172,7 +172,7 @@ mod tests {
 
     #[rstest]
     fn test_indent_sexp_directly() {
-        assert_debug_snapshot!(indent_sexp(r#"(one (two) (+ 1 :atom) "string")"#, 2));
+        assert_debug_snapshot!(indent_s_expr(r#"(one (two) (+ 1 :atom) "string")"#, 2));
     }
 
     #[rstest]
@@ -251,7 +251,7 @@ mod tests {
     fn test_parse_sexp_symbols_atom() {
         assert_debug_snapshot!(parse_sexp("(fn symbol :atom)"));
         assert_debug_snapshot!(
-            indent_sexp("(+ (alpha / beta) (gamma * delta))", 2),
+            indent_s_expr("(+ (alpha / beta) (gamma * delta))", 2),
             @r###"
         Ok(
             "(\n  +\n  (\n    alpha\n    /\n    beta\n  )\n  (\n    gamma\n    *\n    delta\n  )\n)\n",
