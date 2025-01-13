@@ -52,12 +52,6 @@ struct Token<'a> {
     pub content: &'a str,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-struct Line<'a> {
-    pub indent: usize,
-    pub content: &'a str,
-}
-
 #[derive(Debug, Clone)]
 pub struct NotSexprError;
 
