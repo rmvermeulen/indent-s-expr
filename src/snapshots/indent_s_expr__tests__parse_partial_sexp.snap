@@ -1,6 +1,6 @@
 ---
 source: src/lib.rs
-expression: "parse_sexp(\"(+ 1 2\")"
+expression: "parse_sexp(\"(+ 1 2 3\")"
 ---
 Err(
     NotSexprError,
