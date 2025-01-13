@@ -1,6 +1,6 @@
 [package]
 name = "indent_s_expr"
-version = "1.0.1"
+version = "1.0.2"
 edition = "2021"
 description = "Dumb-as-rocks S-expression indenter"
 license = "MIT"
