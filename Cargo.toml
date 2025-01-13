@@ -1,12 +1,12 @@
 [package]
 name = "indent_s_expr"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2021"
 description = "Dumb-as-rocks S-expression indenter"
 license = "MIT"
 repository = "https://github.com/rmvermeulen/indent-s-expr.git"
 
 [dev-dependencies]
-insta = "1.35.1"
-rstest = "0.18.2"
-rstest_reuse = "0.6.0"
+insta = "1.42.0"
+rstest = "0.24.0"
+rstest_reuse = "0.7.0"
