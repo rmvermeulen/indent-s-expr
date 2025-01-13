@@ -232,7 +232,7 @@ mod tests {
     }
 
     #[rstest]
-    fn test_parse_sexp_addition_nested_doule() {
+    fn test_parse_sexp_addition_nested_double() {
         assert_debug_snapshot!(parse_sexp("(+ 10 (+ 22 31) (+ 47 52))"));
     }
 
